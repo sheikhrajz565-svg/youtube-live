@@ -4,15 +4,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  stream:
     runs-on: ubuntu-latest
-    steps:
-      - name: Install ffmpeg
-        run: sudo apt update && sudo apt install -y ffmpeg
+    timeout-minutes: 350
 
-      - name: Stream to YouTube
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg
         run: |
-          ffmpeg -re -i "https://docs.google.com/uc?export=download&id=1Wf7w-oI0QIr5fHF-g2RX20JM73NTmaxe" \
-          -c:v libx264 -preset ultrafast -b:v 1500k -maxrate 1500k -bufsize 3000k \
-          -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -f flv \
-          "rtmp://a.rtmp.youtube.com/live2/${{ secrets.STREAM_KEY }}"
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Download video
+        run: |
+          mkdir -p media
+          # এখানে তোমার ভিডিওটা repo তে থাকলে: cp path/to/video.mp4 media/input.mp4
+          # অথবা সরাসরি লিংক দিয়ে নামাবে:
+          curl -L "${{ secrets.VIDEO_URL }}" -o media/input.mp4
+
+      - name: Stream to YouTube (Loop)
+        env:
+          RTMP_URL: ${{ secrets.YOUTUBE_RTMP_URL }}
+          STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY }}
+        run: |
+          ffmpeg -re -stream_loop -1 -i media/input.mp4 \
+          -c:v libx264 -preset veryfast -b:v 2500k -maxrate 2500k -bufsize 5000k \
+          -pix_fmt yuv420p -g 60 \
+          -c:a aac -b:a 128k -ar 44100 \
+          -f flv "${RTMP_URL}/${STREAM_KEY}"
