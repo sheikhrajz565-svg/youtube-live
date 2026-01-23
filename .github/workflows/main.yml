@@ -1,18 +1,13 @@
 name: YouTube Live Stream
-
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install ffmpeg
-        run: sudo apt update && sudo apt install -y ffmpeg
-
-      - name: Stream to YouTube
-        run: |
-          ffmpeg -re -i "https://docs.google.com/uc?export=download&id=1Wf7w-oI0QIr5fHF-g2RX20JM73NTmaxe" \
-          -c:v libx264 -preset ultrafast -b:v 1500k -maxrate 1500k -bufsize 3000k \
-          -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -f flv \
-          "rtmp://a.rtmp.youtube.com/live2/${{ secrets.STREAM_KEY }}"
+    - name: Install ffmpeg
+      run: sudo apt update && sudo apt install -y ffmpeg
+    - name: Download Video
+      run: curl -L -o 1229.mp4 "https://github.com/sheikhrajz565-svg/youtube-live/releases/download/v1/1229.mp4"
+    - name: Stream to YouTube
+      run: ffmpeg -re -stream_loop -1 -i 1229.mp4 -vcodec libx264 -preset veryfast -maxrate 3000k -bufsize 6000k -pix_fmt yuv420p -g 50 -c:a aac -b:a 128k -f flv "rtmp://a.rtmp.youtube.com/live2/w633-c4yu-8f4u-z4w1-06y8"
