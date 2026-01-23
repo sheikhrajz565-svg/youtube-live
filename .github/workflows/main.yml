@@ -13,6 +13,6 @@ jobs:
       - name: Stream to YouTube
         run: |
           ffmpeg -re -i "https://docs.google.com/uc?export=download&id=1Wf7w-oI0QIr5fHF-g2RX20JM73NTmaxe" \
-          -c:v libx264 -preset ultrafast -b:v 1000k -maxrate 1000k -bufsize 2000k \
+          -c:v libx264 -preset ultrafast -b:v 1500k -maxrate 1500k -bufsize 3000k \
           -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -f flv \
           "rtmp://a.rtmp.youtube.com/live2/${{ secrets.STREAM_KEY }}"
